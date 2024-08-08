@@ -22,14 +22,14 @@ app.get('/', (req, res) => {
 })
 
 app.post('/item', (req, res) => {
-    const sql = 'INSERT INTO items (`name`, `description`,`price`,`image`,`category_id`,`brand_id`) VALUES (?)';
+    const sql = 'INSERT INTO items (`name`, `description`,`price`,`image`,`category_id`) VALUES (?)';
     const values = [
         req.body.name,
         req.body.description,
         req.body.price,
         req.body.image,
         req.body.category_id,
-        req.body.brand_id
+        
     ]
     db.query(sql, [values], (err, result) => {
         if (err) return res.json(err);
@@ -47,9 +47,9 @@ app.get('/read/:id', (req, res) => {
 })
 
 app.put('/edit/:id', (req, res) => {
-    const sql = 'UPDATE items SET `name`=?, `description`=?, `price`=?, `image`=?,`category_id`=?,`brand_id`=? WHERE id=?';
+    const sql = 'UPDATE items SET `name`=?, `description`=?, `price`=?, `image`=?,`category_id`=? WHERE id=?';
     const id = req.params.id;
-    db.query(sql, [req.body.name, req.body.description, req.body.price, req.body.image, req.body.category_id, req.body.brand_id, id], (err, result) => {
+    db.query(sql, [req.body.name, req.body.description, req.body.price, req.body.image, req.body.category_id,  id], (err, result) => {
         if (err) return res.json({ Message: "Error inside server" });
         return res.json(result);
     });
