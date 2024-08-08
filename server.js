@@ -42,16 +42,29 @@ app.get('/', (req, res) => {
     });
 });
 
+<<<<<<< HEAD
 app.post('/create', upload.single('image'), (req, res) => {
     const sql = 'INSERT INTO items (`name`, `description`, `price`, `image`, `category_id`) VALUES (?, ?, ?, ?, ?)';
+=======
+app.post('/item', (req, res) => {
+    const sql = 'INSERT INTO items (`name`, `description`,`price`,`image`,`category_id`) VALUES (?)';
+>>>>>>> b33a787d8237ba7928b660748ea6e7c0bc16808c
     const values = [
         req.body.name,
         req.body.description,
         req.body.price,
+<<<<<<< HEAD
         req.file ? req.file.filename : null, // Kiểm tra xem tệp có được tải lên không
         req.body.category_id
     ];
     db.query(sql, values, (err, result) => {
+=======
+        req.body.image,
+        req.body.category_id,
+        
+    ]
+    db.query(sql, [values], (err, result) => {
+>>>>>>> b33a787d8237ba7928b660748ea6e7c0bc16808c
         if (err) return res.json(err);
         return res.json(result);
     });
@@ -66,6 +79,7 @@ app.get('/read/:id', (req, res) => {
     });
 });
 
+<<<<<<< HEAD
 app.put('/edit/:id', upload.single('image'), (req, res) => {
     const sql = 'UPDATE items SET `name`=?, `description`=?, `price`=?, `image`=?, `category_id`=? WHERE id=?';
     const values = [
@@ -79,6 +93,14 @@ app.put('/edit/:id', upload.single('image'), (req, res) => {
     db.query(sql, [...values, id], (err, data) => {
         if (err) return res.json("err");
         return res.json(data);
+=======
+app.put('/edit/:id', (req, res) => {
+    const sql = 'UPDATE items SET `name`=?, `description`=?, `price`=?, `image`=?,`category_id`=? WHERE id=?';
+    const id = req.params.id;
+    db.query(sql, [req.body.name, req.body.description, req.body.price, req.body.image, req.body.category_id,  id], (err, result) => {
+        if (err) return res.json({ Message: "Error inside server" });
+        return res.json(result);
+>>>>>>> b33a787d8237ba7928b660748ea6e7c0bc16808c
     });
 });
 
@@ -113,5 +135,10 @@ router.get('/items/categories', async (req, res) => {
 app.use('/api', router);
 
 app.listen(8081, () => {
+<<<<<<< HEAD
     console.log("Listening on port 8081");
 });
+=======
+    console.log("Listening");
+})
+>>>>>>> b33a787d8237ba7928b660748ea6e7c0bc16808c
