@@ -70,6 +70,22 @@ router.get('/items', async (req, res) => {
     }
 });
 
+router.get('/items/categories', async (req, res) => {
+    try {
+        const categories = req.query.categories;
+        if (!categories) {
+            return res.status(400).send('Missing category_ids');
+        }
+        const query = `SELECT * FROM items WHERE category_id IN (${categories})`;
+        const [rows] = await db.promise().query(query);
+
+        res.json(rows);
+    } catch (error) {
+        console.error('Error fetching items:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 app.post('/create', upload.single('image'), (req, res) => {
     const sql = 'INSERT INTO items (`name`, `description`, `price`, `image`, `category_id`) VALUES (?, ?, ?, ?, ?)';
@@ -138,6 +154,7 @@ router.get('/items/categories', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
 
 app.use('/api', router);
 
