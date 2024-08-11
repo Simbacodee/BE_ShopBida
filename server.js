@@ -34,13 +34,6 @@ db.connect(function (err) {
     console.log("Connected!");
 });
 
-// app.get('/', (req, res) => {
-//     const sql = "SELECT * FROM items";
-//     db.query(sql, (err, result) => {
-//         if (err) return res.json({ Message: "Error inside server" });
-//         return res.json(result);
-//     });
-// });
 // Route để lấy sản phẩm với phân trang
 router.get('/items', async (req, res) => {
     try {
