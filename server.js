@@ -1,25 +1,28 @@
+// Import các thư viện cần thiết
 const express = require('express');
 const mysql = require('mysql2/promise'); // Sử dụng mysql2/promise
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
+
+// Khởi tạo ứng dụng Express và router
 const app = express();
 const router = express.Router();
 
-app.use(cors());
-app.use(express.json());
-app.use(express.static('./public'));
+// Cấu hình middleware
+app.use(cors()); // Cho phép các yêu cầu từ các nguồn gốc khác
+app.use(express.json()); // Xử lý các yêu cầu JSON
+app.use(express.static('./public')); // Phục vụ các file tĩnh từ thư mục public
 
-// Tạo chỗ chứa file img
+// Cấu hình multer để lưu trữ file
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './public/images');
+        cb(null, './public/images'); // Thư mục lưu trữ hình ảnh
     },
     filename: function (req, file, cb) {
-        cb(null, `${Date.now()}_${file.originalname}`);
+        cb(null, `${Date.now()}_${file.originalname}`); // Đặt tên file với timestamp để tránh trùng lặp
     }
 });
-
 const upload = multer({ storage });
 
 // Khởi tạo kết nối với MySQL
@@ -58,6 +61,7 @@ router.get('/items', async (req, res) => {
     }
 });
 
+// Route để lấy sản phẩm theo danh mục
 router.get('/items/categories', async (req, res) => {
     try {
         const categories = req.query.categories;
@@ -72,6 +76,7 @@ router.get('/items/categories', async (req, res) => {
     }
 });
 
+// Route để tạo sản phẩm mới
 app.post('/create', upload.single('image'), async (req, res) => {
     try {
         const sql = 'INSERT INTO items (name, description, price, image, category_id) VALUES (?, ?, ?, ?, ?)';
@@ -89,6 +94,7 @@ app.post('/create', upload.single('image'), async (req, res) => {
     }
 });
 
+// Route để đọc thông tin sản phẩm theo ID
 app.get('/read/:id', async (req, res) => {
     try {
         const sql = 'SELECT * FROM items WHERE id = ?';
@@ -100,6 +106,7 @@ app.get('/read/:id', async (req, res) => {
     }
 });
 
+// Route để chỉnh sửa sản phẩm theo ID
 app.put('/edit/:id', upload.single('image'), async (req, res) => {
     try {
         const sql = 'UPDATE items SET name=?, description=?, price=?, image=?, category_id=? WHERE id=?';
@@ -118,6 +125,7 @@ app.put('/edit/:id', upload.single('image'), async (req, res) => {
     }
 });
 
+// Route để xóa sản phẩm theo ID
 app.delete('/delete/:id', async (req, res) => {
     try {
         const sql = 'DELETE FROM items WHERE id = ?';
@@ -129,6 +137,7 @@ app.delete('/delete/:id', async (req, res) => {
     }
 });
 
+// Route để đặt hàng
 app.post('/order', async (req, res) => {
     const { customerName, address, phoneNumber, email, totalAmount, items } = req.body;
 
@@ -161,6 +170,7 @@ app.post('/order', async (req, res) => {
     }
 });
 
+// Route để lấy danh sách đơn hàng
 router.get('/orders', async (req, res) => {
     try {
         const query = `
@@ -178,9 +188,28 @@ router.get('/orders', async (req, res) => {
     }
 });
 
+// Route để đăng nhập admin
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
 
+    try {
+        const [rows] = await db.query('SELECT * FROM admin_accounts WHERE username = ? AND password = ?', [username, password]);
+
+        if (rows.length > 0) {
+            res.json({ success: true });
+        } else {
+            res.json({ success: false });
+        }
+    } catch (err) {
+        console.error('Error logging in:', err);
+        res.status(500).json({ success: false });
+    }
+});
+
+// Đăng ký router vào ứng dụng
 app.use('/api', router);
 
+// Khởi chạy ứng dụng
 app.listen(8081, () => {
     console.log("Listening on port 8081");
 });
