@@ -206,6 +206,25 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Route để tìm kiếm sản phẩm theo tên
+router.get('/items/search', async (req, res) => {
+    try {
+        const searchText = req.query.q;
+        if (!searchText) {
+            return res.status(400).send('Missing search query');
+        }
+
+        // Truy vấn sản phẩm theo tên
+        const [rows] = await db.query('SELECT * FROM items WHERE name LIKE ?', [`%${searchText}%`]);
+        res.json(rows);
+    } catch (error) {
+        console.error('Error searching items:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
+
 // Đăng ký router vào ứng dụng
 app.use('/api', router);
 
