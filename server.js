@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
         cb(null, './public/images'); // Thư mục lưu trữ hình ảnh
     },
     filename: function (req, file, cb) {
-        cb(null, `${Date.now()}_${file.originalname}`); // Đặt tên file với timestamp để tránh trùng lặp
+        cb(null, `${Date.now()}_${file.originalname}`);
     }
 });
 const upload = multer({ storage });
@@ -187,6 +187,58 @@ router.get('/orders', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
+router.delete('/orders/:id', async (req, res) => {
+    try {
+        const orderId = req.params.id;
+
+        // Xóa các mục trong đơn hàng trước
+        await db.query('DELETE FROM order_items WHERE order_id = ?', [orderId]);
+
+        // Xóa đơn hàng
+        await db.query('DELETE FROM orders WHERE id = ?', [orderId]);
+
+        res.status(200).json({ message: 'Order deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        res.status(500).json({ error: 'Failed to delete order' });
+    }
+});
+// Route để xóa đơn hàng theo ID
+router.delete('/orders/:id', async (req, res) => {
+    try {
+        const orderId = req.params.id;
+
+        // Xóa các sản phẩm liên quan đến đơn hàng trước
+        const deleteOrderItemsQuery = 'DELETE FROM order_items WHERE order_id = ?';
+        await db.query(deleteOrderItemsQuery, [orderId]);
+
+        // Xóa đơn hàng
+        const deleteOrderQuery = 'DELETE FROM orders WHERE id = ?';
+        const [result] = await db.query(deleteOrderQuery, [orderId]);
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        res.status(500).json({ error: 'Failed to delete order' });
+    }
+});
+
+// Route để xác nhận đơn hàng
+router.put('/orders/:id/confirm', async (req, res) => {
+    try {
+        const orderId = req.params.id;
+
+        // Cập nhật trạng thái đơn hàng thành "confirmed" hoặc trạng thái tương ứng
+        await db.query('UPDATE orders SET status = "confirmed" WHERE id = ?', [orderId]);
+
+        res.status(200).json({ message: 'Order confirmed successfully' });
+    } catch (error) {
+        console.error('Error confirming order:', error);
+        res.status(500).json({ error: 'Failed to confirm order' });
+    }
+});
+
 
 // Route để đăng nhập admin
 router.post('/login', async (req, res) => {
